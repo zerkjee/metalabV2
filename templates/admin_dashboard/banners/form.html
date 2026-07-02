@@ -1,0 +1,39 @@
+{% extends "admin_dashboard/base_admin.html" %}
+{% block titulo %}{{ titulo }} — Painel{% endblock %}
+
+{% block conteudo %}
+<h1 class="h4 fw-bold mb-4">{{ titulo }}</h1>
+
+<form method="post" enctype="multipart/form-data" novalidate style="max-width: 640px;">
+  {% csrf_token %}
+  {% if form.non_field_errors %}<div class="alert alert-danger">{{ form.non_field_errors }}</div>{% endif %}
+
+  <div class="card border-0 shadow-sm mb-4">
+    <div class="card-body">
+      <div class="row g-3">
+        <div class="col-12"><label class="form-label">Título</label>{{ form.titulo }}{{ form.titulo.errors }}</div>
+        <div class="col-12"><label class="form-label">Subtítulo</label>{{ form.subtitulo }}{{ form.subtitulo.errors }}</div>
+        <div class="col-12">
+          <label class="form-label">Imagem *</label>{{ form.imagem }}{{ form.imagem.errors }}
+          {% if form.instance.imagem %}
+            <img src="{{ form.instance.imagem.url }}" alt="" class="img-fluid rounded mt-2" style="max-height:120px">
+          {% endif %}
+        </div>
+        <div class="col-12 col-md-8"><label class="form-label">Link (URL)</label>{{ form.link }}{{ form.link.errors }}</div>
+        <div class="col-12 col-md-4"><label class="form-label">Texto do botão</label>{{ form.texto_botao }}</div>
+        <div class="col-6 col-md-4"><label class="form-label">Ordem</label>{{ form.ordem }}</div>
+        <div class="col-6 col-md-4 d-flex align-items-end">
+          <div class="form-check form-switch">
+            {{ form.ativo }} <label class="form-check-label" for="{{ form.ativo.id_for_label }}">Ativo</label>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="d-flex gap-2">
+    <button type="submit" class="btn btn-primary">Salvar banner</button>
+    <a href="{% url 'banners_admin:listagem' %}" class="btn btn-outline-secondary">Cancelar</a>
+  </div>
+</form>
+{% endblock %}

@@ -1,0 +1,104 @@
+{% extends "admin_dashboard/base_admin.html" %}
+{% block titulo %}{{ titulo }} — Painel{% endblock %}
+
+{% block conteudo %}
+<h1 class="h4 fw-bold mb-4">{{ titulo }}</h1>
+
+<form method="post" enctype="multipart/form-data" novalidate>
+  {% csrf_token %}
+  {% if form.non_field_errors %}<div class="alert alert-danger">{{ form.non_field_errors }}</div>{% endif %}
+
+  <div class="row g-4">
+    <div class="col-12 col-lg-8">
+      <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body">
+          <h2 class="h6 fw-bold mb-3">Informações básicas</h2>
+          <div class="row g-3">
+            <div class="col-12 col-md-8">
+              <label class="form-label">Nome *</label>{{ form.nome }}{{ form.nome.errors }}
+            </div>
+            <div class="col-12 col-md-4">
+              <label class="form-label">SKU *</label>{{ form.sku }}{{ form.sku.errors }}
+            </div>
+            <div class="col-12 col-md-6">
+              <label class="form-label">Marca</label>{{ form.marca }}{{ form.marca.errors }}
+            </div>
+            <div class="col-12 col-md-6">
+              <label class="form-label">Categoria</label>{{ form.categoria }}{{ form.categoria.errors }}
+            </div>
+            <div class="col-12">
+              <label class="form-label">Descrição curta</label>{{ form.descricao_curta }}{{ form.descricao_curta.errors }}
+            </div>
+            <div class="col-12">
+              <label class="form-label">Descrição completa</label>{{ form.descricao_completa }}{{ form.descricao_completa.errors }}
+            </div>
+            <div class="col-12 col-md-6">
+              <label class="form-label">Composição</label>{{ form.composicao }}{{ form.composicao.errors }}
+            </div>
+            <div class="col-12 col-md-6">
+              <label class="form-label">Modo de uso</label>{{ form.modo_uso }}{{ form.modo_uso.errors }}
+            </div>
+            <div class="col-12">
+              <label class="form-label">Aviso legal</label>{{ form.aviso_legal }}{{ form.aviso_legal.errors }}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body">
+          <h2 class="h6 fw-bold mb-3">Dimensões para frete (opcional)</h2>
+          <div class="row g-3">
+            <div class="col-6 col-md-3"><label class="form-label">Peso (g)</label>{{ form.peso }}</div>
+            <div class="col-6 col-md-3"><label class="form-label">Altura (cm)</label>{{ form.altura }}</div>
+            <div class="col-6 col-md-3"><label class="form-label">Largura (cm)</label>{{ form.largura }}</div>
+            <div class="col-6 col-md-3"><label class="form-label">Comprimento (cm)</label>{{ form.comprimento }}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-12 col-lg-4">
+      <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body">
+          <h2 class="h6 fw-bold mb-3">Preço e estoque</h2>
+          <div class="mb-3"><label class="form-label">Preço (R$) *</label>{{ form.preco }}{{ form.preco.errors }}</div>
+          <div class="mb-3"><label class="form-label">Preço promocional (R$)</label>{{ form.preco_promocional }}{{ form.preco_promocional.errors }}</div>
+          <div class="mb-3"><label class="form-label">Estoque</label>{{ form.estoque }}{{ form.estoque.errors }}</div>
+          <div class="mb-0"><label class="form-label">Estoque mínimo (alerta)</label>{{ form.estoque_minimo }}{{ form.estoque_minimo.errors }}</div>
+        </div>
+      </div>
+
+      <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body">
+          <h2 class="h6 fw-bold mb-3">Imagens</h2>
+          {% if produto.imagem_principal %}
+            <img src="{{ produto.imagem_principal.url }}" alt="" class="img-fluid rounded mb-2 bg-light" style="max-height:120px">
+          {% endif %}
+          <div class="mb-2"><label class="form-label">Principal</label>{{ form.imagem_principal }}{{ form.imagem_principal.errors }}</div>
+          <div class="mb-2"><label class="form-label">Imagem 2</label>{{ form.imagem_2 }}</div>
+          <div class="mb-2"><label class="form-label">Imagem 3</label>{{ form.imagem_3 }}</div>
+          <div class="mb-0"><label class="form-label">Imagem 4</label>{{ form.imagem_4 }}</div>
+        </div>
+      </div>
+
+      <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body">
+          <h2 class="h6 fw-bold mb-3">Exibição</h2>
+          <div class="form-check form-switch mb-2">
+            {{ form.ativo }} <label class="form-check-label" for="{{ form.ativo.id_for_label }}">Ativo (visível na loja)</label>
+          </div>
+          <div class="form-check form-switch">
+            {{ form.destaque }} <label class="form-check-label" for="{{ form.destaque.id_for_label }}">Destaque na home</label>
+          </div>
+        </div>
+      </div>
+
+      <div class="d-grid gap-2">
+        <button type="submit" class="btn btn-primary btn-lg">Salvar produto</button>
+        <a href="{% url 'produtos_admin:listagem' %}" class="btn btn-outline-secondary">Cancelar</a>
+      </div>
+    </div>
+  </div>
+</form>
+{% endblock %}

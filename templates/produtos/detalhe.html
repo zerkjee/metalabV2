@@ -1,0 +1,162 @@
+{% extends "base.html" %}
+{% load loja_extras %}
+{% block titulo %}{{ produto.meta_titulo|default:produto.nome }} — {{ LOJA_NOME }}{% endblock %}
+{% block meta_descricao %}{{ produto.meta_descricao|default:produto.descricao_curta|default:produto.nome }}{% endblock %}
+
+{% block conteudo %}
+{# Schema.org Product (SEO/GEO/AEO) #}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Product",
+  "name": "{{ produto.nome|escapejs }}",
+  "sku": "{{ produto.sku|escapejs }}",
+  "brand": {"@type": "Brand", "name": "{{ produto.marca|escapejs }}"},
+  "description": "{{ produto.meta_descricao|default:produto.descricao_curta|escapejs }}",
+  {% if produto.imagem_principal %}"image": "{{ request.scheme }}://{{ request.get_host }}{{ produto.imagem_principal.url }}",{% endif %}
+  "offers": {
+    "@type": "Offer",
+    "price": "{{ produto.preco_atual }}",
+    "priceCurrency": "BRL",
+    "availability": "{% if produto.disponivel %}https://schema.org/InStock{% else %}https://schema.org/OutOfStock{% endif %}"
+  }
+}
+</script>
+
+<div class="container mt-4"
+     style="--cor-produto: {{ produto.cor_principal|default:'#002659' }}; --cor-produto-2: {{ produto.cor_secundaria|default:produto.cor_principal|default:'#31629c' }};">
+  <nav aria-label="breadcrumb">
+    <ol class="breadcrumb small">
+      <li class="breadcrumb-item"><a href="{% url 'core:home' %}" class="text-decoration-none">Início</a></li>
+      <li class="breadcrumb-item"><a href="{% url 'produtos:listagem' %}" class="text-decoration-none">Produtos</a></li>
+      {% if produto.categoria %}
+        <li class="breadcrumb-item">
+          <a href="{{ produto.categoria.get_absolute_url }}" class="text-decoration-none">{{ produto.categoria.nome }}</a>
+        </li>
+      {% endif %}
+      <li class="breadcrumb-item active">{{ produto.nome }}</li>
+    </ol>
+  </nav>
+
+  <div class="row g-4 mt-1 produto-hero p-3 p-md-4 mx-0">
+    {# Imagens #}
+    <div class="col-12 col-md-6">
+      <div class="p-3">
+        <div class="img-wrap" style="aspect-ratio: 1/1;
+             display:flex; align-items:center; justify-content:center;">
+          {% if produto.imagem_principal %}
+            <img id="imagemPrincipal" src="{{ produto.imagem_principal.url }}"
+                 alt="{{ produto.nome }}" class="img-fluid" style="max-height:100%; object-fit:contain;">
+          {% else %}
+            <i class="bi bi-capsule display-1 text-secondary"></i>
+          {% endif %}
+        </div>
+        {% if produto.imagem_2 or produto.imagem_3 or produto.imagem_4 %}
+          <div class="d-flex gap-2 mt-3">
+            {% if produto.imagem_principal %}
+              <img src="{{ produto.imagem_principal.url }}" alt="" class="img-thumbnail" width="72"
+                   style="cursor:pointer" onclick="document.getElementById('imagemPrincipal').src=this.src">
+            {% endif %}
+            {% if produto.imagem_2 %}
+              <img src="{{ produto.imagem_2.url }}" alt="" class="img-thumbnail" width="72"
+                   style="cursor:pointer" onclick="document.getElementById('imagemPrincipal').src=this.src">
+            {% endif %}
+            {% if produto.imagem_3 %}
+              <img src="{{ produto.imagem_3.url }}" alt="" class="img-thumbnail" width="72"
+                   style="cursor:pointer" onclick="document.getElementById('imagemPrincipal').src=this.src">
+            {% endif %}
+            {% if produto.imagem_4 %}
+              <img src="{{ produto.imagem_4.url }}" alt="" class="img-thumbnail" width="72"
+                   style="cursor:pointer" onclick="document.getElementById('imagemPrincipal').src=this.src">
+            {% endif %}
+          </div>
+        {% endif %}
+      </div>
+    </div>
+
+    {# Informações e compra #}
+    <div class="col-12 col-md-6 d-flex flex-column justify-content-center">
+      {% if produto.marca == "Inovitann Clinical" %}
+        <span class="selo-inovitann badge align-self-start mb-2">✦ LINHA INOVITANN CLINICAL</span>
+      {% endif %}
+      <span class="small opacity-75">{{ produto.marca }} — SKU {{ produto.sku }}</span>
+      <h1 class="h3 fw-bold">{{ produto.nome }}</h1>
+      {% if produto.descricao_curta %}<p class="opacity-75">{{ produto.descricao_curta|truncatechars:160 }}</p>{% endif %}
+
+      <div class="my-3">
+        {% if produto.em_promocao %}
+          <span class="badge badge-desconto">-{{ produto|desconto_pct }}%</span>
+          <div class="preco-antigo opacity-75" style="color:#fff">De R$ {{ produto.preco }}</div>
+        {% endif %}
+        <div class="fs-2 fw-bold">R$ {{ produto.preco_atual }}</div>
+        <div class="opacity-75">ou 3x de R$ {{ produto.preco_atual|parcela:3 }} sem juros</div>
+      </div>
+
+      {% if produto.disponivel %}
+        <form method="post" action="{% url 'checkout:adicionar' produto.pk %}" class="d-flex gap-2 align-items-center">
+          {% csrf_token %}
+          <input type="hidden" name="next" value="{% url 'checkout:carrinho' %}">
+          <label for="qtd" class="form-label mb-0">Qtd:</label>
+          <input id="qtd" type="number" name="quantidade" value="1" min="1" max="{{ produto.estoque }}"
+                 class="form-control" style="width: 90px;">
+          <button class="btn btn-light btn-lg flex-grow-1 fw-semibold" type="submit"
+                  style="color: var(--cor-produto, var(--ml-navy));">
+            <i class="bi bi-cart-plus"></i> Adicionar ao carrinho
+          </button>
+        </form>
+        <p class="small opacity-75 mt-2">{{ produto.estoque }} unidade(s) em estoque</p>
+      {% else %}
+        <div class="alert alert-light mb-0">Produto indisponível no momento.</div>
+      {% endif %}
+    </div>
+  </div>
+
+  {# Faixa de confiança tematizada #}
+  <div class="faixa-produto p-3 mt-4 d-flex flex-wrap gap-4 small">
+    <span><i class="bi bi-patch-check"></i> Fabricado pela Metalab Farma — padrão farmacêutico</span>
+    <span><i class="bi bi-truck"></i> Frete grátis acima de R$ 199</span>
+    <span><i class="bi bi-shield-check"></i> Compra 100% segura</span>
+  </div>
+
+  {# Abas de conteúdo #}
+  <div class="card border-0 shadow-sm mt-5">
+    <div class="card-body">
+      <ul class="nav nav-tabs" role="tablist">
+        <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#descricao" type="button">Descrição</button></li>
+        {% if produto.composicao %}
+          <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#composicao" type="button">Composição</button></li>
+        {% endif %}
+        {% if produto.modo_uso %}
+          <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#modouso" type="button">Modo de uso</button></li>
+        {% endif %}
+      </ul>
+      <div class="tab-content pt-3">
+        <div class="tab-pane fade show active" id="descricao">
+          {{ produto.descricao_completa|linebreaks }}
+          {% if produto.aviso_legal %}
+            <p class="small text-muted border-top pt-2 mt-3">{{ produto.aviso_legal }}</p>
+          {% endif %}
+        </div>
+        {% if produto.composicao %}
+          <div class="tab-pane fade" id="composicao">{{ produto.composicao|linebreaks }}</div>
+        {% endif %}
+        {% if produto.modo_uso %}
+          <div class="tab-pane fade" id="modouso">{{ produto.modo_uso|linebreaks }}</div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  {# Relacionados #}
+  {% if relacionados %}
+    <section class="mt-5">
+      <h2 class="h5 fw-bold mb-3">Você também pode gostar</h2>
+      <div class="row g-3 row-cols-2 row-cols-md-4">
+        {% for produto in relacionados %}
+          <div class="col">{% include "partials/product_card.html" %}</div>
+        {% endfor %}
+      </div>
+    </section>
+  {% endif %}
+</div>
+{% endblock %}

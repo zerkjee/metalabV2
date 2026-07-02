@@ -1,0 +1,50 @@
+{% extends "admin_dashboard/base_admin.html" %}
+{% block titulo %}Banners — Painel{% endblock %}
+
+{% block conteudo %}
+<div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-2">
+  <h1 class="h4 fw-bold mb-0">Banners</h1>
+  <a href="{% url 'banners_admin:novo' %}" class="btn btn-primary"><i class="bi bi-plus-lg"></i> Novo banner</a>
+</div>
+
+<div class="card border-0 shadow-sm">
+  <div class="table-responsive">
+    <table class="table table-hover align-middle mb-0">
+      <thead>
+        <tr><th>Imagem</th><th>Título</th><th class="text-center">Ordem</th><th>Status</th><th class="text-end">Ações</th></tr>
+      </thead>
+      <tbody>
+        {% for banner in pagina.object_list %}
+          <tr>
+            <td><img src="{{ banner.imagem.url }}" alt="" height="48" class="rounded"></td>
+            <td>{{ banner.titulo|default:"—" }}</td>
+            <td class="text-center">{{ banner.ordem }}</td>
+            <td>
+              {% if banner.ativo %}
+                <span class="badge text-bg-success">Ativo</span>
+              {% else %}
+                <span class="badge text-bg-secondary">Inativo</span>
+              {% endif %}
+            </td>
+            <td class="text-end">
+              <div class="d-inline-flex gap-1">
+                <a href="{% url 'banners_admin:editar' banner.pk %}" class="btn btn-sm btn-outline-primary"
+                   aria-label="Editar"><i class="bi bi-pencil"></i></a>
+                <form method="post" action="{% url 'banners_admin:excluir' banner.pk %}"
+                      onsubmit="return confirm('Excluir este banner?');">
+                  {% csrf_token %}
+                  <button class="btn btn-sm btn-outline-danger" type="submit" aria-label="Excluir">
+                    <i class="bi bi-trash"></i></button>
+                </form>
+              </div>
+            </td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="5" class="text-center text-muted py-4">Nenhum banner cadastrado.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% include "partials/paginacao.html" %}
+{% endblock %}

@@ -1,0 +1,128 @@
+{% extends "base.html" %}
+{% block titulo %}Carrinho — {{ LOJA_NOME }}{% endblock %}
+
+{% block conteudo %}
+<div class="container mt-4">
+  <h1 class="h4 fw-bold mb-4">Meu carrinho</h1>
+
+  {% if itens %}
+    <div class="row g-4">
+      <div class="col-12 col-lg-8">
+        <div class="card border-0 shadow-sm">
+          <div class="table-responsive">
+            <table class="table align-middle mb-0">
+              <thead>
+                <tr>
+                  <th scope="col">Produto</th>
+                  <th scope="col" class="text-center">Qtd</th>
+                  <th scope="col" class="text-end">Preço</th>
+                  <th scope="col" class="text-end">Subtotal</th>
+                  <th scope="col"></th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for item in itens %}
+                  <tr>
+                    <td>
+                      <div class="d-flex align-items-center gap-2">
+                        {% if item.produto.imagem_principal %}
+                          <img src="{{ item.produto.imagem_principal.url }}" alt="" width="48"
+                               class="rounded bg-cinza">
+                        {% endif %}
+                        <a href="{{ item.produto.get_absolute_url }}"
+                           class="text-decoration-none text-dark">{{ item.produto.nome }}</a>
+                      </div>
+                    </td>
+                    <td class="text-center" style="min-width:110px">
+                      <form method="post" action="{% url 'checkout:atualizar' item.produto.pk %}"
+                            class="d-flex gap-1 justify-content-center">
+                        {% csrf_token %}
+                        <input type="number" name="quantidade" value="{{ item.quantidade }}"
+                               min="1" max="{{ item.produto.estoque }}"
+                               class="form-control form-control-sm" style="width:70px">
+                        <button class="btn btn-sm btn-outline-secondary" type="submit"
+                                aria-label="Atualizar quantidade"><i class="bi bi-arrow-repeat"></i></button>
+                      </form>
+                    </td>
+                    <td class="text-end">R$ {{ item.preco_unitario }}</td>
+                    <td class="text-end fw-semibold">R$ {{ item.subtotal }}</td>
+                    <td class="text-end">
+                      <form method="post" action="{% url 'checkout:remover' item.produto.pk %}">
+                        {% csrf_token %}
+                        <button class="btn btn-sm btn-outline-danger" type="submit"
+                                aria-label="Remover item"><i class="bi bi-trash"></i></button>
+                      </form>
+                    </td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <form method="post" action="{% url 'checkout:limpar' %}" class="mt-2">
+          {% csrf_token %}
+          <button class="btn btn-link text-danger p-0" type="submit">Esvaziar carrinho</button>
+        </form>
+      </div>
+
+      <div class="col-12 col-lg-4">
+        <div class="card border-0 shadow-sm">
+          <div class="card-body">
+            <h2 class="h6 fw-bold">Resumo</h2>
+
+            {# Cupom #}
+            {% if totais.cupom %}
+              <div class="d-flex justify-content-between align-items-center small mb-2">
+                <span class="text-success">
+                  <i class="bi bi-tag"></i> {{ totais.cupom.codigo }}
+                </span>
+                <form method="post" action="{% url 'checkout:remover_cupom' %}">
+                  {% csrf_token %}
+                  <button class="btn btn-sm btn-link text-danger p-0" type="submit">remover</button>
+                </form>
+              </div>
+            {% else %}
+              <form method="post" action="{% url 'checkout:aplicar_cupom' %}" class="input-group input-group-sm mb-3">
+                {% csrf_token %}
+                <input type="text" name="codigo" class="form-control" placeholder="Cupom de desconto">
+                <button class="btn btn-outline-primary" type="submit">Aplicar</button>
+              </form>
+            {% endif %}
+
+            <dl class="mb-0">
+              <div class="d-flex justify-content-between">
+                <dt class="fw-normal">Subtotal</dt><dd>R$ {{ totais.subtotal }}</dd>
+              </div>
+              {% if totais.desconto > 0 %}
+                <div class="d-flex justify-content-between text-success">
+                  <dt class="fw-normal">Desconto</dt><dd>− R$ {{ totais.desconto }}</dd>
+                </div>
+              {% endif %}
+              <div class="d-flex justify-content-between">
+                <dt class="fw-normal">Frete</dt>
+                <dd>{% if totais.frete == 0 %}<span class="text-success">Grátis</span>{% else %}R$ {{ totais.frete }}{% endif %}</dd>
+              </div>
+              <hr class="my-2">
+              <div class="d-flex justify-content-between fs-5 fw-bold">
+                <dt>Total</dt><dd class="text-verde">R$ {{ totais.total }}</dd>
+              </div>
+            </dl>
+            <a href="{% url 'checkout:checkout' %}" class="btn btn-primary w-100 btn-lg mt-3">
+              Finalizar compra <i class="bi bi-arrow-right"></i>
+            </a>
+            <a href="{% url 'produtos:listagem' %}" class="btn btn-link w-100 text-decoration-none">
+              Continuar comprando
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  {% else %}
+    <div class="text-center py-5">
+      <i class="bi bi-cart-x fs-1 text-secondary"></i>
+      <p class="mt-2 text-muted">Seu carrinho está vazio.</p>
+      <a href="{% url 'produtos:listagem' %}" class="btn btn-primary">Ver produtos</a>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

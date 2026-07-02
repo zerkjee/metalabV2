@@ -1,0 +1,89 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block titulo %}Painel — {{ LOJA_NOME }}{% endblock %}</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
+        crossorigin="anonymous">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet"
+        integrity="sha384-XGjxtQfXaH2tnPFa9x+ruJTuLE3Aa6LhHSWRr1XeTyhezb4abCG4ccI5AkVDxqC+"
+        crossorigin="anonymous">
+  <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body class="bg-light">
+
+<div class="container-fluid">
+  <div class="row">
+    <!-- Sidebar -->
+    <nav class="col-12 col-md-3 col-lg-2 admin-sidebar p-3 text-white">
+      <a href="{% url 'relatorios:dashboard' %}" class="text-white text-decoration-none fs-5 fw-bold d-block mb-3">
+        <i class="bi bi-capsule"></i> {{ LOJA_NOME }}
+      </a>
+      <ul class="nav flex-column gap-1">
+        <li class="nav-item">
+          <a class="nav-link px-2 {% if request.resolver_match.namespace == 'relatorios' and request.resolver_match.url_name == 'dashboard' %}active{% endif %}"
+             href="{% url 'relatorios:dashboard' %}"><i class="bi bi-speedometer2 me-1"></i> Dashboard</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link px-2 {% if request.resolver_match.namespace == 'produtos_admin' %}active{% endif %}"
+             href="{% url 'produtos_admin:listagem' %}"><i class="bi bi-box-seam me-1"></i> Produtos</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link px-2 {% if request.resolver_match.namespace == 'pedidos_admin' %}active{% endif %}"
+             href="{% url 'pedidos_admin:listagem' %}"><i class="bi bi-receipt me-1"></i> Pedidos</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link px-2 {% if request.resolver_match.namespace == 'clientes_admin' %}active{% endif %}"
+             href="{% url 'clientes_admin:listagem' %}"><i class="bi bi-people me-1"></i> Clientes</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link px-2 {% if request.resolver_match.namespace == 'cupons_admin' %}active{% endif %}"
+             href="{% url 'cupons_admin:listagem' %}"><i class="bi bi-tag me-1"></i> Cupons</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link px-2 {% if request.resolver_match.namespace == 'banners_admin' %}active{% endif %}"
+             href="{% url 'banners_admin:listagem' %}"><i class="bi bi-image me-1"></i> Banners</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link px-2 {% if request.resolver_match.url_name == 'relatorios' %}active{% endif %}"
+             href="{% url 'relatorios:relatorios' %}"><i class="bi bi-bar-chart me-1"></i> Relatórios</a>
+        </li>
+      </ul>
+      <hr class="opacity-25">
+      <ul class="nav flex-column gap-1">
+        <li class="nav-item"><a class="nav-link px-2" href="{% url 'core:home' %}"><i class="bi bi-shop me-1"></i> Ver loja</a></li>
+        <li class="nav-item"><a class="nav-link px-2" href="/django-admin/"><i class="bi bi-gear me-1"></i> Django Admin</a></li>
+        <li class="nav-item">
+          <form method="post" action="{% url 'accounts:logout' %}" class="m-0">
+            {% csrf_token %}
+            <button class="nav-link px-2 btn btn-link" type="submit">
+              <i class="bi bi-box-arrow-right me-1"></i> Sair
+            </button>
+          </form>
+        </li>
+      </ul>
+    </nav>
+
+    <!-- Conteúdo -->
+    <main class="col-12 col-md-9 col-lg-10 p-4">
+      {% if messages %}
+        {% for message in messages %}
+          <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags|default:'info' }}{% endif %} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fechar"></button>
+          </div>
+        {% endfor %}
+      {% endif %}
+      {% block conteudo %}{% endblock %}
+    </main>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+        crossorigin="anonymous"></script>
+</body>
+</html>

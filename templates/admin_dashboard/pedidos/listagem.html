@@ -1,0 +1,61 @@
+{% extends "admin_dashboard/base_admin.html" %}
+{% block titulo %}Pedidos — Painel{% endblock %}
+
+{% block conteudo %}
+<h1 class="h4 fw-bold mb-4">Pedidos</h1>
+
+<form method="get" class="row g-2 mb-3">
+  <div class="col-12 col-md-4">
+    <input type="search" name="q" value="{{ termo }}" class="form-control"
+           placeholder="Código, nome ou e-mail...">
+  </div>
+  <div class="col-8 col-md-3">
+    <select name="status" class="form-select">
+      <option value="">Todos os status</option>
+      {% for valor, rotulo in status_choices %}
+        <option value="{{ valor }}" {% if status_atual == valor %}selected{% endif %}>{{ rotulo }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="col-4 col-md-2">
+    <button class="btn btn-outline-secondary w-100" type="submit">Filtrar</button>
+  </div>
+</form>
+
+<div class="card border-0 shadow-sm">
+  <div class="table-responsive">
+    <table class="table table-hover align-middle mb-0">
+      <thead>
+        <tr>
+          <th>Código</th><th>Cliente</th><th>Data</th><th>Status</th>
+          <th>Pagamento</th><th class="text-end">Total</th><th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for pedido in pagina.object_list %}
+          <tr>
+            <td class="fw-semibold">{{ pedido.codigo }}</td>
+            <td>{{ pedido.comprador_nome|default:"—" }}</td>
+            <td>{{ pedido.criado_em|date:"d/m/Y H:i" }}</td>
+            <td><span class="badge text-bg-secondary">{{ pedido.get_status_display }}</span></td>
+            <td>
+              {% if pedido.status_pagamento == "PAGO" %}
+                <span class="badge text-bg-success">Pago</span>
+              {% else %}
+                <span class="badge text-bg-warning text-dark">{{ pedido.get_status_pagamento_display }}</span>
+              {% endif %}
+            </td>
+            <td class="text-end">R$ {{ pedido.total }}</td>
+            <td class="text-end">
+              <a href="{% url 'pedidos_admin:detalhe' pedido.pk %}" class="btn btn-sm btn-outline-primary">Ver</a>
+            </td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="7" class="text-center text-muted py-4">Nenhum pedido encontrado.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% include "partials/paginacao.html" %}
+{% endblock %}

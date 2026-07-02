@@ -1,0 +1,133 @@
+{% extends "admin_dashboard/base_admin.html" %}
+{% block titulo %}Pedido {{ pedido.codigo }} — Painel{% endblock %}
+
+{% block conteudo %}
+<div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-2">
+  <h1 class="h4 fw-bold mb-0">
+    Pedido {{ pedido.codigo }}
+    <span class="badge text-bg-secondary align-middle">{{ pedido.get_status_display }}</span>
+  </h1>
+  <a href="{% url 'pedidos_admin:listagem' %}" class="btn btn-outline-secondary btn-sm">
+    <i class="bi bi-arrow-left"></i> Voltar
+  </a>
+</div>
+
+<div class="row g-3">
+  <div class="col-12 col-lg-8">
+    {# Itens #}
+    <div class="card border-0 shadow-sm mb-3">
+      <div class="card-header bg-white fw-bold">Itens</div>
+      <div class="table-responsive">
+        <table class="table align-middle mb-0">
+          <thead><tr><th>Produto</th><th>SKU</th><th class="text-center">Qtd</th>
+            <th class="text-end">Unitário</th><th class="text-end">Subtotal</th></tr></thead>
+          <tbody>
+            {% for item in pedido.itens.all %}
+              <tr>
+                <td>{{ item.nome_produto_snapshot }}</td>
+                <td>{{ item.sku_snapshot }}</td>
+                <td class="text-center">{{ item.quantidade }}</td>
+                <td class="text-end">R$ {{ item.preco_unitario }}</td>
+                <td class="text-end">R$ {{ item.subtotal }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+          <tfoot class="table-light">
+            <tr><td colspan="4" class="text-end">Subtotal</td><td class="text-end">R$ {{ pedido.subtotal }}</td></tr>
+            {% if pedido.desconto > 0 %}
+              <tr><td colspan="4" class="text-end text-success">Desconto {% if pedido.cupom %}({{ pedido.cupom.codigo }}){% endif %}</td>
+                  <td class="text-end text-success">− R$ {{ pedido.desconto }}</td></tr>
+            {% endif %}
+            <tr><td colspan="4" class="text-end">Frete</td><td class="text-end">R$ {{ pedido.frete }}</td></tr>
+            <tr class="fw-bold"><td colspan="4" class="text-end">Total</td><td class="text-end">R$ {{ pedido.total }}</td></tr>
+          </tfoot>
+        </table>
+      </div>
+    </div>
+
+    {# Histórico #}
+    <div class="card border-0 shadow-sm">
+      <div class="card-header bg-white fw-bold">Histórico de status</div>
+      <ul class="list-group list-group-flush">
+        {% for h in pedido.historico.all %}
+          <li class="list-group-item small">
+            <strong>{{ h.criado_em|date:"d/m/Y H:i" }}</strong> —
+            {{ h.status_anterior|default:"(criação)" }} → {{ h.status_novo }}
+            {% if h.usuario %} por {{ h.usuario.username }}{% endif %}
+            {% if h.observacao %}<span class="text-muted"> · {{ h.observacao }}</span>{% endif %}
+          </li>
+        {% empty %}
+          <li class="list-group-item text-muted">Sem alterações registradas.</li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+
+  <div class="col-12 col-lg-4">
+    {# Cliente #}
+    <div class="card border-0 shadow-sm mb-3">
+      <div class="card-header bg-white fw-bold">Cliente</div>
+      <div class="card-body small">
+        <p class="mb-1"><strong>{{ pedido.comprador_nome }}</strong></p>
+        <p class="mb-1">{{ pedido.comprador_email }}</p>
+        <p class="mb-1">{{ pedido.comprador_telefone }}</p>
+        <p class="mb-0 text-muted">{{ pedido.endereco_entrega|default:"Sem endereço" }}</p>
+        {% if pedido.cliente %}
+          <a href="{% url 'clientes_admin:detalhe' pedido.cliente.pk %}" class="btn btn-sm btn-outline-primary mt-2">
+            Ver cadastro</a>
+        {% endif %}
+      </div>
+    </div>
+
+    {# Pagamento #}
+    <div class="card border-0 shadow-sm mb-3">
+      <div class="card-header bg-white fw-bold">Pagamento</div>
+      <div class="card-body small">
+        <p class="mb-1"><strong>Método:</strong> {{ pedido.get_metodo_pagamento_display|default:"—" }}</p>
+        <p class="mb-2"><strong>Status:</strong> {{ pedido.get_status_pagamento_display }}</p>
+        {% if pedido.status_pagamento != "PAGO" and not pedido.cancelado %}
+          <form method="post" action="{% url 'pedidos_admin:marcar_pago' pedido.pk %}">
+            {% csrf_token %}
+            <button class="btn btn-success btn-sm w-100" type="submit">
+              <i class="bi bi-check-lg"></i> Marcar como pago</button>
+          </form>
+        {% endif %}
+      </div>
+    </div>
+
+    {# Ações #}
+    <div class="card border-0 shadow-sm">
+      <div class="card-header bg-white fw-bold">Ações</div>
+      <div class="card-body d-grid gap-2">
+        <form method="post" action="{% url 'pedidos_admin:status' pedido.pk %}" class="input-group input-group-sm">
+          {% csrf_token %}
+          <select name="status" class="form-select">
+            {% for valor, rotulo in status_choices %}
+              <option value="{{ valor }}" {% if pedido.status == valor %}selected{% endif %}>{{ rotulo }}</option>
+            {% endfor %}
+          </select>
+          <button class="btn btn-outline-primary" type="submit">Mudar</button>
+        </form>
+        {% if not pedido.cancelado and pedido.status != "ENTREGUE" %}
+          <form method="post" action="{% url 'pedidos_admin:marcar_enviado' pedido.pk %}">
+            {% csrf_token %}
+            <button class="btn btn-outline-primary btn-sm w-100" type="submit">
+              <i class="bi bi-truck"></i> Marcar enviado</button>
+          </form>
+          <form method="post" action="{% url 'pedidos_admin:marcar_entregue' pedido.pk %}">
+            {% csrf_token %}
+            <button class="btn btn-outline-success btn-sm w-100" type="submit">
+              <i class="bi bi-box-seam"></i> Marcar entregue</button>
+          </form>
+          <form method="post" action="{% url 'pedidos_admin:cancelar' pedido.pk %}"
+                onsubmit="return confirm('Cancelar o pedido {{ pedido.codigo|escapejs }}? O estoque será devolvido.');">
+            {% csrf_token %}
+            <button class="btn btn-outline-danger btn-sm w-100" type="submit">
+              <i class="bi bi-x-lg"></i> Cancelar pedido</button>
+          </form>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

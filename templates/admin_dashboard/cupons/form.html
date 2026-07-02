@@ -1,0 +1,38 @@
+{% extends "admin_dashboard/base_admin.html" %}
+{% block titulo %}{{ titulo }} — Painel{% endblock %}
+
+{% block conteudo %}
+<h1 class="h4 fw-bold mb-4">{{ titulo }}</h1>
+
+<form method="post" novalidate style="max-width: 640px;">
+  {% csrf_token %}
+  {% if form.non_field_errors %}<div class="alert alert-danger">{{ form.non_field_errors }}</div>{% endif %}
+
+  <div class="card border-0 shadow-sm mb-4">
+    <div class="card-body">
+      <div class="row g-3">
+        <div class="col-12 col-md-6"><label class="form-label">Código *</label>{{ form.codigo }}{{ form.codigo.errors }}</div>
+        <div class="col-12 col-md-6"><label class="form-label">Tipo *</label>{{ form.tipo }}{{ form.tipo.errors }}</div>
+        <div class="col-12 col-md-6">
+          <label class="form-label">Valor</label>{{ form.valor }}{{ form.valor.errors }}
+          <div class="form-text">Percentual (ex.: 10 = 10%) ou valor em R$. Ignorado para frete grátis.</div>
+        </div>
+        <div class="col-12 col-md-6"><label class="form-label">Pedido mínimo (R$)</label>{{ form.valor_minimo_pedido }}{{ form.valor_minimo_pedido.errors }}</div>
+        <div class="col-12 col-md-6"><label class="form-label">Início</label>{{ form.data_inicio }}{{ form.data_inicio.errors }}</div>
+        <div class="col-12 col-md-6"><label class="form-label">Fim</label>{{ form.data_fim }}{{ form.data_fim.errors }}</div>
+        <div class="col-12 col-md-6"><label class="form-label">Uso máximo</label>{{ form.uso_maximo }}{{ form.uso_maximo.errors }}</div>
+        <div class="col-12">
+          <div class="form-check form-switch">
+            {{ form.ativo }} <label class="form-check-label" for="{{ form.ativo.id_for_label }}">Ativo</label>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="d-flex gap-2">
+    <button type="submit" class="btn btn-primary">Salvar cupom</button>
+    <a href="{% url 'cupons_admin:listagem' %}" class="btn btn-outline-secondary">Cancelar</a>
+  </div>
+</form>
+{% endblock %}

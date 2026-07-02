@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block titulo %}Erro interno — {{ LOJA_NOME }}{% endblock %}
+{% block conteudo %}
+<div class="container text-center py-5 my-5">
+  <h1 class="display-4 fw-bold text-verde">500</h1>
+  <p class="lead">Algo deu errado do nosso lado. Tente novamente em instantes.</p>
+  <a href="{% url 'core:home' %}" class="btn btn-primary">Voltar para a loja</a>
+</div>
+{% endblock %}

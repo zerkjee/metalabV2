@@ -1,0 +1,85 @@
+{% extends "admin_dashboard/base_admin.html" %}
+{% load humanize %}
+{% block titulo %}Relatórios — {{ LOJA_NOME }}{% endblock %}
+
+{% block conteudo %}
+<h1 class="h4 fw-bold mb-4">Relatórios</h1>
+
+<div class="row g-3 mb-4">
+  <div class="col-6 col-lg-3">
+    <div class="card border-0 shadow-sm"><div class="card-body">
+      <span class="text-muted small">Total vendido (histórico)</span>
+      <div class="fs-5 fw-bold text-verde">R$ {{ resumo.total_vendido|floatformat:2|intcomma }}</div>
+    </div></div>
+  </div>
+  <div class="col-6 col-lg-3">
+    <div class="card border-0 shadow-sm"><div class="card-body">
+      <span class="text-muted small">Faturamento do mês</span>
+      <div class="fs-5 fw-bold">R$ {{ resumo.faturamento_mes|floatformat:2|intcomma }}</div>
+    </div></div>
+  </div>
+  <div class="col-6 col-lg-3">
+    <div class="card border-0 shadow-sm"><div class="card-body">
+      <span class="text-muted small">Últimos 7 dias</span>
+      <div class="fs-5 fw-bold">R$ {{ resumo.faturamento_7_dias|floatformat:2|intcomma }}</div>
+    </div></div>
+  </div>
+  <div class="col-6 col-lg-3">
+    <div class="card border-0 shadow-sm"><div class="card-body">
+      <span class="text-muted small">Produtos ativos</span>
+      <div class="fs-5 fw-bold">{{ resumo.produtos_ativos }}</div>
+    </div></div>
+  </div>
+</div>
+
+<div class="row g-3">
+  <div class="col-12 col-lg-7">
+    <div class="card border-0 shadow-sm">
+      <div class="card-header bg-white fw-bold">Produtos mais vendidos</div>
+      <div class="table-responsive">
+        <table class="table align-middle mb-0">
+          <thead><tr><th>Produto</th><th>SKU</th><th class="text-end">Unidades</th><th class="text-end">Receita</th></tr></thead>
+          <tbody>
+            {% for linha in mais_vendidos %}
+              <tr>
+                <td>{{ linha.nome_produto_snapshot }}</td>
+                <td>{{ linha.sku_snapshot }}</td>
+                <td class="text-end">{{ linha.vendidos }}</td>
+                <td class="text-end">R$ {{ linha.receita|floatformat:2 }}</td>
+              </tr>
+            {% empty %}
+              <tr><td colspan="4" class="text-center text-muted py-3">Sem vendas ainda.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  <div class="col-12 col-lg-5">
+    <div class="card border-0 shadow-sm mb-3">
+      <div class="card-header bg-white fw-bold">Pedidos por status</div>
+      <ul class="list-group list-group-flush">
+        {% for linha in por_status %}
+          <li class="list-group-item d-flex justify-content-between">
+            <span>{{ linha.label }}</span>
+            <span class="badge text-bg-secondary">{{ linha.quantidade }}</span>
+          </li>
+        {% endfor %}
+      </ul>
+    </div>
+    <div class="card border-0 shadow-sm">
+      <div class="card-header bg-white fw-bold">Baixo estoque</div>
+      <ul class="list-group list-group-flush">
+        {% for produto in baixo_estoque %}
+          <li class="list-group-item d-flex justify-content-between">
+            <span>{{ produto.nome }}</span>
+            <span class="fw-bold {% if produto.estoque == 0 %}text-danger{% endif %}">{{ produto.estoque }}</span>
+          </li>
+        {% empty %}
+          <li class="list-group-item text-muted">Tudo em ordem.</li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+</div>
+{% endblock %}

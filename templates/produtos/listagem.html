@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block titulo %}{{ titulo }} — {{ LOJA_NOME }}{% endblock %}
+
+{% block conteudo %}
+<div class="container mt-4">
+  <nav aria-label="breadcrumb">
+    <ol class="breadcrumb small">
+      <li class="breadcrumb-item"><a href="{% url 'core:home' %}" class="text-decoration-none">Início</a></li>
+      <li class="breadcrumb-item active">{{ titulo }}</li>
+    </ol>
+  </nav>
+
+  <div class="row">
+    {# Sidebar de categorias #}
+    <aside class="col-12 col-lg-3 mb-4">
+      <div class="card border-0 shadow-sm">
+        <div class="card-header bg-white fw-bold">Categorias</div>
+        <div class="list-group list-group-flush">
+          <a href="{% url 'produtos:listagem' %}"
+             class="list-group-item list-group-item-action {% if not categoria_atual %}active{% endif %}">
+            Todos os produtos
+          </a>
+          {% for cat in categorias_menu %}
+            <a href="{{ cat.get_absolute_url }}"
+               class="list-group-item list-group-item-action {% if categoria_atual.pk == cat.pk %}active{% endif %}">
+              {{ cat.nome }}
+            </a>
+          {% endfor %}
+        </div>
+      </div>
+    </aside>
+
+    {# Grid de produtos #}
+    <div class="col-12 col-lg-9">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h1 class="h4 fw-bold mb-0">{{ titulo }}</h1>
+        <span class="text-muted small">{{ pagina.paginator.count }} produto(s)</span>
+      </div>
+
+      {% if pagina.object_list %}
+        <div class="row g-3 row-cols-2 row-cols-md-3">
+          {% for produto in pagina.object_list %}
+            <div class="col">{% include "partials/product_card.html" %}</div>
+          {% endfor %}
+        </div>
+        {% include "partials/paginacao.html" %}
+      {% else %}
+        <div class="text-center py-5">
+          <i class="bi bi-search fs-1 text-secondary"></i>
+          <p class="mt-2 text-muted">Nenhum produto encontrado.</p>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

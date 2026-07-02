@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block titulo %}Pedido realizado — {{ LOJA_NOME }}{% endblock %}
+
+{% block conteudo %}
+<div class="container mt-5 text-center" style="max-width: 640px;">
+  <i class="bi bi-check-circle-fill text-success" style="font-size: 4rem;"></i>
+  <h1 class="h3 fw-bold mt-3">Pedido realizado com sucesso!</h1>
+  <p class="lead">Seu pedido <strong class="text-verde">{{ pedido.codigo }}</strong> foi registrado.</p>
+
+  <div class="card border-0 shadow-sm text-start mt-4">
+    <div class="card-body">
+      <h2 class="h6 fw-bold">Resumo</h2>
+      <ul class="list-unstyled small mb-3">
+        {% for item in pedido.itens.all %}
+          <li class="d-flex justify-content-between py-1 border-bottom">
+            <span>{{ item.quantidade }}x {{ item.nome_produto_snapshot }}</span>
+            <span>R$ {{ item.subtotal }}</span>
+          </li>
+        {% endfor %}
+      </ul>
+      <div class="d-flex justify-content-between fw-bold">
+        <span>Total</span><span class="text-verde">R$ {{ pedido.total }}</span>
+      </div>
+      <hr>
+      <p class="small mb-1"><strong>Pagamento:</strong> {{ pedido.get_metodo_pagamento_display }} — {{ pedido.get_status_pagamento_display }}</p>
+      <p class="small mb-0"><strong>Entrega:</strong> {{ pedido.endereco_entrega }}</p>
+    </div>
+  </div>
+
+  <p class="text-muted small mt-3">
+    Você receberá as instruções de pagamento pelo e-mail {{ pedido.comprador_email }}.
+  </p>
+  <a href="{% url 'produtos:listagem' %}" class="btn btn-primary mt-2">Continuar comprando</a>
+</div>
+{% endblock %}

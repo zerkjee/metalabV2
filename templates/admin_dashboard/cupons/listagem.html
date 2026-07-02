@@ -1,0 +1,74 @@
+{% extends "admin_dashboard/base_admin.html" %}
+{% block titulo %}Cupons — Painel{% endblock %}
+
+{% block conteudo %}
+<div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-2">
+  <h1 class="h4 fw-bold mb-0">Cupons</h1>
+  <a href="{% url 'cupons_admin:novo' %}" class="btn btn-primary"><i class="bi bi-plus-lg"></i> Novo cupom</a>
+</div>
+
+<div class="card border-0 shadow-sm">
+  <div class="table-responsive">
+    <table class="table table-hover align-middle mb-0">
+      <thead>
+        <tr>
+          <th>Código</th><th>Tipo</th><th class="text-end">Valor</th>
+          <th>Validade</th><th class="text-end">Usos</th><th>Status</th><th class="text-end">Ações</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for cupom in pagina.object_list %}
+          <tr>
+            <td class="fw-semibold">{{ cupom.codigo }}</td>
+            <td>{{ cupom.get_tipo_display }}</td>
+            <td class="text-end">
+              {% if cupom.tipo == "PERCENTUAL" %}{{ cupom.valor|floatformat:0 }}%
+              {% elif cupom.tipo == "VALOR_FIXO" %}R$ {{ cupom.valor }}
+              {% else %}—{% endif %}
+            </td>
+            <td class="small">
+              {% if cupom.data_fim %}até {{ cupom.data_fim|date:"d/m/Y" }}{% else %}sem limite{% endif %}
+            </td>
+            <td class="text-end">{{ cupom.usos_realizados }}{% if cupom.uso_maximo %}/{{ cupom.uso_maximo }}{% endif %}</td>
+            <td>
+              {% if cupom.ativo %}
+                <span class="badge text-bg-success">Ativo</span>
+              {% else %}
+                <span class="badge text-bg-secondary">Inativo</span>
+              {% endif %}
+            </td>
+            <td class="text-end">
+              <div class="d-inline-flex gap-1">
+                <a href="{% url 'cupons_admin:editar' cupom.pk %}" class="btn btn-sm btn-outline-primary"
+                   aria-label="Editar"><i class="bi bi-pencil"></i></a>
+                {% if cupom.ativo %}
+                  <form method="post" action="{% url 'cupons_admin:desativar' cupom.pk %}">
+                    {% csrf_token %}
+                    <button class="btn btn-sm btn-outline-warning" type="submit" aria-label="Desativar">
+                      <i class="bi bi-eye-slash"></i></button>
+                  </form>
+                {% else %}
+                  <form method="post" action="{% url 'cupons_admin:ativar' cupom.pk %}">
+                    {% csrf_token %}
+                    <button class="btn btn-sm btn-outline-success" type="submit" aria-label="Ativar">
+                      <i class="bi bi-eye"></i></button>
+                  </form>
+                {% endif %}
+                <form method="post" action="{% url 'cupons_admin:excluir' cupom.pk %}"
+                      onsubmit="return confirm('Excluir o cupom {{ cupom.codigo|escapejs }}?');">
+                  {% csrf_token %}
+                  <button class="btn btn-sm btn-outline-danger" type="submit" aria-label="Excluir">
+                    <i class="bi bi-trash"></i></button>
+                </form>
+              </div>
+            </td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="7" class="text-center text-muted py-4">Nenhum cupom cadastrado.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% include "partials/paginacao.html" %}
+{% endblock %}

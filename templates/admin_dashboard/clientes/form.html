@@ -1,0 +1,44 @@
+{% extends "admin_dashboard/base_admin.html" %}
+{% block titulo %}{{ titulo }} — Painel{% endblock %}
+
+{% block conteudo %}
+<h1 class="h4 fw-bold mb-4">{{ titulo }}</h1>
+
+<form method="post" novalidate style="max-width: 860px;">
+  {% csrf_token %}
+  {% if form.non_field_errors %}<div class="alert alert-danger">{{ form.non_field_errors }}</div>{% endif %}
+
+  <div class="card border-0 shadow-sm mb-4">
+    <div class="card-body">
+      <h2 class="h6 fw-bold mb-3">Dados pessoais</h2>
+      <div class="row g-3">
+        <div class="col-12 col-md-6"><label class="form-label">Nome *</label>{{ form.nome }}{{ form.nome.errors }}</div>
+        <div class="col-12 col-md-6"><label class="form-label">E-mail</label>{{ form.email }}{{ form.email.errors }}</div>
+        <div class="col-12 col-md-4"><label class="form-label">Telefone</label>{{ form.telefone }}{{ form.telefone.errors }}</div>
+        <div class="col-12 col-md-4"><label class="form-label">CPF</label>{{ form.cpf }}{{ form.cpf.errors }}</div>
+        <div class="col-12 col-md-4"><label class="form-label">Nascimento</label>{{ form.data_nascimento }}{{ form.data_nascimento.errors }}</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card border-0 shadow-sm mb-4">
+    <div class="card-body">
+      <h2 class="h6 fw-bold mb-3">Endereço</h2>
+      <div class="row g-3">
+        <div class="col-6 col-md-3"><label class="form-label">CEP</label>{{ form.cep }}{{ form.cep.errors }}</div>
+        <div class="col-12 col-md-7"><label class="form-label">Rua</label>{{ form.rua }}{{ form.rua.errors }}</div>
+        <div class="col-6 col-md-2"><label class="form-label">Número</label>{{ form.numero }}{{ form.numero.errors }}</div>
+        <div class="col-12 col-md-4"><label class="form-label">Complemento</label>{{ form.complemento }}</div>
+        <div class="col-12 col-md-4"><label class="form-label">Bairro</label>{{ form.bairro }}</div>
+        <div class="col-8 col-md-3"><label class="form-label">Cidade</label>{{ form.cidade }}</div>
+        <div class="col-4 col-md-1"><label class="form-label">UF</label>{{ form.estado }}</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="d-flex gap-2">
+    <button type="submit" class="btn btn-primary">Salvar cliente</button>
+    <a href="{% url 'clientes_admin:listagem' %}" class="btn btn-outline-secondary">Cancelar</a>
+  </div>
+</form>
+{% endblock %}
